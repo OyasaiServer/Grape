@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig-gts.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "rootDir": ".",
+    "outDir": "artifacts/ts",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "Node",
+    "sourceMap": false
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

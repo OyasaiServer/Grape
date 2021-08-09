@@ -1,0 +1,32 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+group 'com.baakun'
+version ''
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://papermc.io/repo/repository/maven-public/' }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.21'
+    implementation 'io.vacco.java-express:java-express:0.2.1'
+    compileOnly 'io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT'
+    implementation 'io.socket:socket.io-client:2.0.1'
+}
+
+shadowJar {
+}
+
+jar {
+    duplicatesStrategy = "include"
+    from {
+        configurations.compileClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
