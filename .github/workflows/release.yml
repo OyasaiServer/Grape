@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
-          YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+          yarn install
           yarn compile
       - uses: actions/create-release@v1
         id: create_release
