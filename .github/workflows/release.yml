@@ -53,6 +53,6 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./plugin/build/libs/plugin.jar
-            asset_name: Plugin.jar
+            asset_path: ./plugin/build/libs/Grape.jar
+            asset_name: Grape.jar
             asset_content_type: application/java-archive

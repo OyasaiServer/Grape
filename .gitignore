@@ -2,6 +2,10 @@ build
 test/*
 artifacts
 !test/test.js
+!test/plugins/*
+!test/plugins/PlugMan.jar
+!test/eula.txt
+!test/conf.json
 
 # https://yarnpkg.com/getting-started/qa/#which-files-should-be-gitignored
 .yarn/*
