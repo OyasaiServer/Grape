@@ -1,7 +1,7 @@
 {
   "name": "grape",
   "description": "Backend for OyasaiServer <baakun.com>",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": true,
   "author": "Shun Ueda <shu225@lehigh.edu>",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "compile:plugin": "cd plugin && (chmod +x gradlew || echo \"Skipping chmod...\") && ./gradlew jar",
     "fix": "gts fix",
     "precommit": "npm --no-git-tag-version version patch && git add .",
-    "postinstall": "husky install"
+    "postinstall": "husky install && git config --global push.followTags true"
   },
   "engines": {
     "node": ">=16.0.0"
