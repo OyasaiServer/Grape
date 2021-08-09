@@ -1,7 +1,7 @@
 {
   "name": "grape",
   "description": "Backend for OyasaiServer <baakun.com>",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "author": "Shun Ueda <shu225@lehigh.edu>",
   "license": "MIT",
@@ -15,6 +15,7 @@
     "compile:server": "webpack",
     "compile:plugin": "cd plugin && (chmod +x gradlew || echo \"Skipping chmod...\") && ./gradlew jar",
     "fix": "gts fix",
+    "precommit": "npm --no-git-tag-version version patch && git add .",
     "postinstall": "husky install"
   },
   "engines": {
