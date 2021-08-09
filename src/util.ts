@@ -22,3 +22,9 @@ export async function downloadPaperJar(version: string) {
         console.log()
     }
 }
+
+export function sleep(timeout: number) {
+    return new Promise(resolve => {
+        setTimeout(resolve, timeout)
+    })
+}

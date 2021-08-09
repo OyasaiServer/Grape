@@ -5,8 +5,7 @@
 import { readFile } from './wrap'
 import Server from './server'
 import { Config } from './types'
-import { downloadPaperJar } from './util'
-import sleep from 'sleep-promise'
+import { downloadPaperJar, sleep } from './util'
 import { CronJob } from 'cron'
 
 const conf = await readFile<Config>('./conf.json')

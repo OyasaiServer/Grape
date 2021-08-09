@@ -1,7 +1,7 @@
 {
   "name": "grape",
   "description": "Backend for OyasaiServer <baakun.com>",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "private": true,
   "author": "Shun Ueda <shu225@lehigh.edu>",
   "license": "MIT",
@@ -30,9 +30,7 @@
   "dependencies": {
     "cron": "^1.8.2",
     "download": "^8.0.0",
-    "ora": "^5.4.1",
-    "readline-promise": "^1.0.5",
-    "sleep-promise": "^9.1.0"
+    "ora": "^5.4.1"
   },
   "devDependencies": {
     "@commitlint/cli": "13.1.0",
