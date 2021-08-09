@@ -1,7 +1,7 @@
 {
   "name": "grape",
   "description": "Backend for OyasaiServer <baakun.com>",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "author": "Shun Ueda <shu225@lehigh.edu>",
   "license": "MIT",

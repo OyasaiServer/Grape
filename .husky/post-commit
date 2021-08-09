@@ -1,8 +1,12 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-version=$(git diff HEAD^..HEAD -- "$(git rev-parse --show-toplevel)"/package.json | grep '^\+.*version' | sed -s 's/[^0-9\.]//g')
+version=`git diff HEAD^..HEAD -- "$(git rev-parse --show-toplevel)"/package.json | grep -m 1 '^\+.*version' | sed -s 's/[^A-Z0-9\.\-]//g'`
 
-if [ "$version" != "" ]; then
-    git tag -a "v$version" -m "$(git log -1 --format=%s)"
+if [[ ! $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(\-[A-Z]+\.[0-9]+)?$ ]]; then
+    echo -e "Skip tag: invalid version '$version'"
+    exit 1
 fi
+
+git tag -a "v$version" -m "`git log -1 --format=%s`"
+echo "Created a new tag, v$version"
