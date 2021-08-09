@@ -1,7 +1,7 @@
 {
   "name": "grape",
   "description": "Backend for OyasaiServer <baakun.com>",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "author": "Shun Ueda <shu225@lehigh.edu>",
   "license": "MIT",
@@ -38,7 +38,6 @@
     "@types/cron": "^1.7.3",
     "@types/download": "^8.0.1",
     "@types/node": "^16.4.13",
-    "@types/ora": "^3.2.0",
     "commitizen": "4.2.4",
     "cz-conventional-changelog": "3.3.0",
     "eslint": "^7.32.0",
