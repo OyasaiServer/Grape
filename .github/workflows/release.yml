@@ -3,8 +3,12 @@ name: Release
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -28,14 +32,11 @@ jobs:
       - run: |
           YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
           yarn compile
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
       - uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: ${{ steps.package-version.outputs.current-version}}
-          release_name: Release ${{ steps.package-version.outputs.current-version}}
+          tag_name: ${{ github.ref}}
+          release_name: Release v${{ github.ref}}
           draft: false
           prerelease: false
         env:
