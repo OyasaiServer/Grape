@@ -17,11 +17,9 @@ class Grape : JavaPlugin() {
         socket.on(Socket.EVENT_CONNECT) {
             socket.emit("internal")
             socket.on("ok") {
-                Timer().scheduleAtFixedRate(object : TimerTask() {
-                    override fun run() {
-                        socket.emit("ping")
-                    }
-                }, 0, 5000)
+                socket.on("ping") {
+                    socket.emit("pong")
+                }
                 socket.on("cmd") {
                     Bukkit.getScheduler().callSyncMethod(this) { Bukkit.dispatchCommand(Bukkit.getConsoleSender(), it[0] as String) }.get()
                 }

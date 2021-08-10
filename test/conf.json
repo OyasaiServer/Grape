@@ -1,4 +1,5 @@
 {
+    "address": "baakun.com",
     "version": "1.17.1",
     "restartTime": 5,
     "socketPort": 3000,
