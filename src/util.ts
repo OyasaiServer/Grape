@@ -3,24 +3,16 @@ import { promises } from 'fs'
 import { download } from './wrap'
 import EventEmitter from 'events'
 
-export async function downloadPaperJar(version: string) {
+export async function downloader(filename: string, url: string) {
     console.log()
-    const deleteSpinner = ora('Deleting old paper.jar...').start()
+    const deleteSpinner = ora(`Deleting old ${filename}`).start()
     try {
-        await promises.unlink('./paper.jar')
+        await promises.unlink(filename)
     } finally {
         deleteSpinner.succeed()
-        const downloadSpinner = ora(
-            `Downloading latest paper.jar for ${version}...`
-        ).start()
-        await download(
-            `https://papermc.io/api/v1/paper/${version}/latest/download`,
-            'paper.jar'
-        )
+        const downloadSpinner = ora('Downloading...').start()
+        await download(url, filename)
         downloadSpinner.succeed()
-        console.log()
-        ora('Starting server...').info()
-        console.log()
     }
 }
 

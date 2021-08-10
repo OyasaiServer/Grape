@@ -6,3 +6,4 @@ import Server from './server'
 
 const server = new Server()
 await server.start()
+console.log('SERVER HAS STARTED!!!')
