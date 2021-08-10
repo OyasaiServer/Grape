@@ -2,6 +2,7 @@ package com.baakun.grape
 
 import io.socket.client.IO
 import io.socket.client.Socket
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import java.net.URI
 import java.util.*
@@ -13,17 +14,17 @@ class Grape : JavaPlugin() {
         val uri = URI.create("http://localhost:3000")
         val options = IO.Options.builder().build()
         val socket: Socket = IO.socket(uri, options)!!
-        var i = 0
         socket.on(Socket.EVENT_CONNECT) {
-            Timer().scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    println("$i: Test")
-                    socket.emit("test", "$i: Test")
-                    i++
+            socket.emit("internal")
+            socket.on("ok") {
+                Timer().scheduleAtFixedRate(object : TimerTask() {
+                    override fun run() {
+                        socket.emit("ping")
+                    }
+                }, 0, 5000)
+                socket.on("cmd") {
+                    Bukkit.getScheduler().callSyncMethod(this) { Bukkit.dispatchCommand(Bukkit.getConsoleSender(), it[0] as String) }.get()
                 }
-            }, 0, 1000)
-            socket.on("cmd") {
-
             }
         }
         socket.connect()

@@ -1,28 +1,29 @@
 {
-  "version": "1.17.1",
-  "restartTime": 5,
-  "java": {
-    "location": "java",
-    "args": [
-      "-Xmx6G",
-      "-Xms6G",
-      "-Xmn2G",
-      "-Xss1M",
-      "-XX:UseSSE=3",
-      "-XX:+UseNUMA",
-      "-XX:+DisableExplicitGC",
-      "-XX:MaxGCPauseMillis=30",
-      "-XX:GCPauseIntervalMillis=150",
-      "-XX:-UseGCOverheadLimit",
-      "-XX:+ForceTimeHighResolution",
-      "-XX:+OptimizeStringConcat",
-      "-XX:ReservedCodeCacheSize=2048M",
-      "-XX:+UseCodeCacheFlushing",
-      "-XX:+UseCompressedOops",
-      "-XX:SoftRefLRUPolicyMSPerMB=2000",
-      "-XX:ParallelGCThreads=8",
-      "-Dfml.ignorePatchDiscrepancies=true",
-      "-Dforge.forceNoStencil=true"
-    ]
-  }
+    "version": "1.17.1",
+    "restartTime": 5,
+    "socketPort": 3000,
+    "java": {
+        "location": "java",
+        "args": [
+            "-Xmx6G",
+            "-Xms6G",
+            "-Xmn2G",
+            "-Xss1M",
+            "-XX:UseSSE=3",
+            "-XX:+UseNUMA",
+            "-XX:+DisableExplicitGC",
+            "-XX:MaxGCPauseMillis=30",
+            "-XX:GCPauseIntervalMillis=150",
+            "-XX:-UseGCOverheadLimit",
+            "-XX:+ForceTimeHighResolution",
+            "-XX:+OptimizeStringConcat",
+            "-XX:ReservedCodeCacheSize=2048M",
+            "-XX:+UseCodeCacheFlushing",
+            "-XX:+UseCompressedOops",
+            "-XX:SoftRefLRUPolicyMSPerMB=2000",
+            "-XX:ParallelGCThreads=8",
+            "-Dfml.ignorePatchDiscrepancies=true",
+            "-Dforge.forceNoStencil=true"
+        ]
+    }
 }

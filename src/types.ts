@@ -1,12 +1,11 @@
-export interface ServerConfig {
-    location: string
-    args: string[]
-}
-
 export interface Config {
     version: string
+    socketPort: number
     restartTime: number
-    java: ServerConfig
+    java: {
+        location: string
+        args: string[]
+    }
 }
 
 export interface Env {
