@@ -2,9 +2,7 @@ name: Release
 
 on:
   push:
-    tags:
-      - '*'
-
+    branches: [ main ]
 jobs:
   build:
 
@@ -16,15 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set output
-        id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - name: Check output
-        env:
-          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-        run: |
-          echo $RELEASE_VERSION
-          echo ${{ steps.vars.outputs.tag }}
       - uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
@@ -36,11 +25,14 @@ jobs:
       - run: |
           YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
           yarn compile
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: ${{ steps.vars.outputs.tag}}
-          release_name: Release ${{ steps.vars.outputs.tag}}
+          tag_name: v${{ steps.package-version.outputs.current-version}}
+          release_name: Release v${{ steps.package-version.outputs.current-version}}.
           draft: false
           prerelease: false
         env:
