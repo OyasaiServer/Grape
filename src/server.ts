@@ -2,7 +2,7 @@ import { ChildProcess, exec, spawn } from 'child_process'
 import { Config } from './types'
 import { Server as SocketIO, Socket } from 'socket.io'
 import { readFile } from './wrap'
-import { downloadPaperJar } from './util'
+import { downloadPaperJar, limitedTimeEventListener } from './util'
 import util from 'minecraft-server-util'
 import EventEmitter from 'events'
 
@@ -11,9 +11,9 @@ const { java, version, socketPort, address } = await readFile<Config>(
 )
 
 export default class Server extends EventEmitter {
-    instance?: ChildProcess
-    serverClient?: Socket
-    state = {
+    private instance?: ChildProcess
+    private serverClient?: Socket
+    private state = {
         shouldBeOnline: false,
         isPlayerOnline: false,
         internal: false,
@@ -71,23 +71,37 @@ export default class Server extends EventEmitter {
                     { cwd: './', stdio: 'inherit' }
                 )
             })
-            this.on('state-change', () => {
-                if (this.state.external && this.state.internal) {
-                    resolve()
-                }
-            })
+            limitedTimeEventListener(
+                this,
+                'state-change',
+                () => {
+                    if (this.state.external && this.state.internal) {
+                        this.state.shouldBeOnline = true
+                        resolve()
+                    }
+                },
+                180000
+            )
         })
     }
 
     stop() {
-        this.instance = undefined
         return new Promise<void>(resolve => {
+            if (!this.instance)
+                throw Error('Server has not yet started / already stopped!')
             this.run('stop')
-            this.on('state-change', () => {
-                if (!this.state.external && !this.state.internal) {
-                    resolve()
-                }
-            })
+            this.state.shouldBeOnline = false
+            limitedTimeEventListener(
+                this,
+                'state-change',
+                () => {
+                    if (!this.state.external && !this.state.internal) {
+                        this.instance = undefined
+                        resolve()
+                    }
+                },
+                180000
+            )
         })
     }
 

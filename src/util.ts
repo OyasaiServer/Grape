@@ -1,6 +1,7 @@
 import ora from 'ora'
 import { promises } from 'fs'
 import { download } from './wrap'
+import EventEmitter from 'events'
 
 export async function downloadPaperJar(version: string) {
     console.log()
@@ -27,4 +28,17 @@ export function sleep(timeout: number) {
     return new Promise(resolve => {
         setTimeout(resolve, timeout)
     })
+}
+
+export function limitedTimeEventListener(
+    eventEmitter: EventEmitter,
+    eventName: string,
+    action: () => void,
+    timeout: number
+) {
+    const listener = () => action()
+    eventEmitter.on(eventName, listener)
+    setTimeout(() => {
+        eventEmitter.removeListener(eventName, listener)
+    }, timeout)
 }
