@@ -15,7 +15,7 @@ class Grape : JavaPlugin() {
         val options = IO.Options.builder().build()
         val socket: Socket = IO.socket(uri, options)!!
         socket.on(Socket.EVENT_CONNECT) {
-            socket.emit("internal")
+            socket.emit("internal-connection-request")
             socket.on("ok") {
                 socket.on("ping") {
                     socket.emit("pong")

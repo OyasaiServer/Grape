@@ -8,7 +8,3 @@ export interface Config {
         args: string[]
     }
 }
-
-export interface Env {
-    DISCORD_TOKEN: string
-}

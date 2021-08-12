@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from 'child_process'
 import { Config } from './types'
 import { Server as SocketIO, Socket } from 'socket.io'
 import { readFile } from './wrap'
-import { downloader, limitedTimeEventListener } from './util'
+import { downloader, expectEventWithin, watch } from './util'
 import util from 'minecraft-server-util'
 import EventEmitter from 'events'
 import ora from 'ora'
@@ -13,88 +13,90 @@ const { java, version, socketPort, address } = await readFile<Config>(
 
 export default class Server extends EventEmitter {
     private instance?: ChildProcess
-    private serverClient?: Socket
-    state = {
-        shouldBeOnline: false,
-        onlinePlayerCount: 0,
-        internal: false,
-        external: false
+    private internalSocket?: Socket
+    state: {
+        expected: 'online' | 'offline' | 'starting' | 'stopping'
+        onlinePlayerCount: number
+        internalCheck: boolean
+        externalCheck: boolean
     }
-
     constructor() {
         super()
+        this.state = {
+            expected: 'offline',
+            onlinePlayerCount: 0,
+            internalCheck: false,
+            externalCheck: false
+        }
+        watch(this.state, () => {
+            this.emit('state-change')
+        })
         const io = new SocketIO(socketPort)
         io.on('connection', client => {
-            client.on('internal', () => {
+            client.on('internal-connection-request', () => {
                 client.emit('ok')
-                this.serverClient = client
+                this.internalSocket = client
             })
             setInterval(async () => {
-                this.serverClient?.emit('ping')
-                let internalTemp = false
-                const pingListener = () => {
-                    internalTemp = true
-                }
-                this.serverClient?.once('pong', pingListener)
-                let externalTemp = false
                 try {
                     const status = await util.status(address)
                     this.state.onlinePlayerCount = status.onlinePlayers || 0
-                    this.emit('state-change')
-                    externalTemp = true
+                    this.state.externalCheck = true
                 } catch (e) {
                     this.state.onlinePlayerCount = 0
-                    this.emit('state-change')
-                    externalTemp = false
-                } finally {
-                    if (this.state.external !== externalTemp) {
-                        this.state.external = externalTemp
-                        this.emit('state-change')
-                    }
+                    this.state.externalCheck = false
                 }
-                setTimeout(() => {
-                    this.serverClient?.removeListener('pong', pingListener)
-                    if (this.state.internal !== internalTemp) {
-                        this.state.internal = internalTemp
-                        this.emit('state-change')
-                    }
-                }, 500)
+                if (this.internalSocket) {
+                    this.internalSocket.emit('ping')
+                    expectEventWithin(500, 'pong', this.internalSocket)
+                        .then(() => {
+                            this.state.internalCheck = true
+                        })
+                        .catch(() => {
+                            this.state.internalCheck = false
+                        })
+                } else {
+                    this.state.internalCheck = false
+                }
             }, 5000)
         })
-        this.on('state-change', async () => {
-            if (
-                !(
-                    (this.state.internal === this.state.external) ===
-                    this.state.shouldBeOnline
-                )
-            ) {
-                this.state = {
-                    shouldBeOnline: false,
-                    onlinePlayerCount: 0,
-                    internal: false,
-                    external: false
-                }
-                if (this.state.shouldBeOnline !== this.state.internal) {
-                    console.log('Server may be slow!!!')
-                    await this.stop()
-                    this.start()
-                } else if (this.state.shouldBeOnline !== this.state.external) {
-                    console.log('Server may be offline!!!')
-                    await this.stop()
-                    this.start()
-                } else if (
-                    (this.state.internal === this.state.external) ===
-                    !this.state.shouldBeOnline
-                ) {
-                    console.log('Serious program error')
-                }
-            }
-        })
+        // this.on('state-change', async () => {
+        //     if (
+        //         !(
+        //             (this.state.internal === this.state.external) ===
+        //             this.state.shouldBeOnline
+        //         )
+        //     ) {
+        //         this.state = {
+        //             shouldBeOnline: false,
+        //             onlinePlayerCount: 0,
+        //             internal: false,
+        //             external: false
+        //         }
+        //         if (this.state.shouldBeOnline !== this.state.internal) {
+        //             console.log('Server may be slow!!!')
+        //             await this.stop()
+        //             this.start()
+        //         } else if (this.state.shouldBeOnline !== this.state.external) {
+        //             console.log('Server may be offline!!!')
+        //             await this.stop()
+        //             this.start()
+        //         } else if (
+        //             (this.state.internal === this.state.external) ===
+        //             !this.state.shouldBeOnline
+        //         ) {
+        //             console.log('Serious program error')
+        //         }
+        //     }
+        // })
     }
+
+    rescue() {}
 
     start() {
         return new Promise<void>(resolve => {
             if (this.instance) throw Error('Server has already started!')
+            this.state.expected = 'starting'
             Promise.all([
                 downloader(
                     'paper.jar',
@@ -113,47 +115,38 @@ export default class Server extends EventEmitter {
                 console.log()
                 ora('Starting server...').info()
                 console.log()
-                limitedTimeEventListener(
-                    this,
-                    'state-change',
-                    () => {
-                        if (this.state.external && this.state.internal) {
-                            this.state.shouldBeOnline = true
-                            this.emit('state-change')
-                            resolve()
-                        }
-                    },
-                    180000
-                )
             })
+            const listener = () => {
+                if (this.state.internalCheck && this.state.externalCheck) {
+                    this.removeListener('state-change', listener)
+                    this.state.expected = 'online'
+                    resolve()
+                }
+            }
+            this.on('state-change', listener)
         })
     }
 
     stop() {
         return new Promise<void>(resolve => {
-            if (!this.instance)
-                throw Error('Server has not yet started / already stopped!')
+            if (!this.instance) throw Error('Server has not yet started!')
+            this.state.expected = 'stopping'
             this.run('stop')
-            this.state.shouldBeOnline = false
-            this.emit('state-change')
-            limitedTimeEventListener(
-                this,
-                'state-change',
-                () => {
-                    if (!this.state.external && !this.state.internal) {
-                        this.instance = undefined
-                        resolve()
-                    }
-                },
-                180000
-            )
+            const listener = () => {
+                if (!this.state.internalCheck && !this.state.externalCheck) {
+                    this.removeListener('state-change', listener)
+                    this.state.expected = 'offline'
+                    resolve()
+                }
+            }
+            this.on('state-change', listener)
         })
     }
 
     run(cmd: string) {
-        if (!this.serverClient) {
+        if (!this.internalSocket) {
             throw Error('Socket connection has not yet established!')
         }
-        this.serverClient?.emit('cmd', cmd)
+        this.internalSocket?.emit('cmd', cmd)
     }
 }
